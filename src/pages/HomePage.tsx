@@ -38,10 +38,17 @@ export function HomePage({
       .finally(() => setLoading(false));
   }, []);
 
-  // Filter products by selected category if set
+  // Filter products by selected category (case-insensitive, robust)
   const displayedProducts = selectedCategory
-    ? products.filter((p) => p.category === selectedCategory)
+    ? products.filter(
+        (p) =>
+          p.category &&
+          p.category.toLowerCase() === selectedCategory.toLowerCase()
+      )
     : products;
+
+  // Limit to 10 products for home page
+  const limitedProducts = displayedProducts.slice(0, 10);
 
   return (
     <div className="min-h-screen bg-pink-50">
@@ -204,16 +211,28 @@ export function HomePage({
           ) : error ? (
             <div className="text-red-600">{error}</div>
           ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {displayedProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  onProductClick={handleProductClick}
-                  onAddToCart={addToCart}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                {limitedProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onProductClick={handleProductClick}
+                    onAddToCart={addToCart}
+                  />
+                ))}
+              </div>
+              {displayedProducts.length > 10 && (
+                <div className="flex justify-center mt-8">
+                  <Button
+                    className="bg-pink-600 hover:bg-pink-700 text-white px-8 py-3 text-lg font-semibold"
+                    onClick={() => navigate("/search")}
+                  >
+                    See All Products
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

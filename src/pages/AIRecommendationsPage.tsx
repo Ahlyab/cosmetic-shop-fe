@@ -17,10 +17,7 @@ import type {
   RecommendationRequest,
   Recommendation,
 } from "../../types";
-import {
-  generateRecommendations,
-  getPersonalizedTips,
-} from "../../utils/recommendations";
+import { getPersonalizedTips } from "../../utils/recommendations";
 
 interface AIRecommendationsPageProps {
   addToCart: (product: Product) => void;
@@ -56,12 +53,26 @@ export function AIRecommendationsPage({
 
   const handleGenerateRecommendations = async () => {
     setIsGeneratingRecommendations(true);
-    const results = await generateRecommendations(
-      recommendationForm,
-      featuredProducts
-    );
-    setRecommendations(results);
-    setIsGeneratingRecommendations(false);
+    setRecommendations([]);
+    try {
+      const res = await fetch("http://localhost:5000/api/ai-recommendations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_info: recommendationForm,
+          products: featuredProducts,
+        }),
+      });
+      const data = await res.json();
+      if (data.recommendations) {
+        // Response is already in the correct format: [{ product, reason, matchScore }]
+        setRecommendations(data.recommendations);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsGeneratingRecommendations(false);
+    }
   };
 
   const resetForm = () => {
@@ -308,7 +319,7 @@ export function AIRecommendationsPage({
                     <Card key={index} className="p-6">
                       <div className="space-y-4">
                         <img
-                          src={rec.product.image || "/placeholder.svg"}
+                          src={rec.product.image_url || "/placeholder.svg"}
                           alt={rec.product.name}
                           className="w-full h-48 object-cover rounded-lg"
                         />
