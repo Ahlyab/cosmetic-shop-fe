@@ -15,6 +15,8 @@ import {
   Bot,
   LogOut,
   History,
+  Menu,
+  X,
 } from "lucide-react";
 
 interface HeaderProps {
@@ -25,6 +27,7 @@ interface HeaderProps {
 
 export function Header({ isLoggedIn, getTotalItems, onSearch }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
@@ -60,7 +63,7 @@ export function Header({ isLoggedIn, getTotalItems, onSearch }: HeaderProps) {
             </span>
           </div>
 
-          {/* Search Bar */}
+          {/* Desktop Search Bar */}
           <div className="hidden md:flex flex-1 max-w-md mx-8">
             <form onSubmit={handleSearch} className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -73,8 +76,8 @@ export function Header({ isLoggedIn, getTotalItems, onSearch }: HeaderProps) {
             </form>
           </div>
 
-          {/* Navigation Icons */}
-          <div className="flex items-center space-x-4">
+          {/* Desktop Navigation Icons */}
+          <div className="hidden md:flex items-center space-x-4">
             <Button
               variant="ghost"
               size="icon"
@@ -98,6 +101,7 @@ export function Header({ isLoggedIn, getTotalItems, onSearch }: HeaderProps) {
               size="icon"
               className="relative"
               onClick={() => navigate("/ai-recommendations")}
+              title="AI Consultant"
             >
               <Bot className="w-5 h-5" />
             </Button>
@@ -106,6 +110,7 @@ export function Header({ isLoggedIn, getTotalItems, onSearch }: HeaderProps) {
               size="icon"
               className="relative"
               onClick={() => navigate("/cart")}
+              title="Cart"
             >
               <ShoppingCart className="w-5 h-5" />
               {getTotalItems() > 0 && (
@@ -127,11 +132,29 @@ export function Header({ isLoggedIn, getTotalItems, onSearch }: HeaderProps) {
               </Button>
             )}
             {isLoggedIn && (
-              <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleLogout}
+                title="Logout"
+              >
                 <LogOut className="w-5 h-5" />
               </Button>
             )}
           </div>
+
+          {/* Mobile Hamburger Menu Button */}
+          <button
+            className="md:hidden p-2 rounded focus:outline-none focus:ring-2 focus:ring-pink-300"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            aria-label="Open menu"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6 text-pink-600" />
+            ) : (
+              <Menu className="w-6 h-6 text-pink-600" />
+            )}
+          </button>
         </div>
 
         {/* Mobile Search Bar */}
@@ -146,6 +169,100 @@ export function Header({ isLoggedIn, getTotalItems, onSearch }: HeaderProps) {
             />
           </form>
         </div>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-4 bg-white rounded-lg shadow-lg border p-4 flex flex-col space-y-2 animate-fade-in z-50">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={isLoggedIn ? "Account" : "Login"}
+              title={isLoggedIn ? "Account" : "Login"}
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate(isLoggedIn ? "/" : "/login");
+              }}
+              className={
+                isLoggedIn
+                  ? "text-green-600 hover:text-green-700 justify-start gap-2"
+                  : "text-pink-600 hover:text-pink-700 justify-start gap-2"
+              }
+            >
+              {isLoggedIn ? (
+                <UserCheck className="w-5 h-5" />
+              ) : (
+                <User className="w-5 h-5" />
+              )}
+              <span className="md:hidden text-base font-medium">
+                {isLoggedIn ? "Account" : "Login"}
+              </span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative justify-start gap-2"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate("/ai-recommendations");
+              }}
+              title="AI Consultant"
+            >
+              <Bot className="w-5 h-5" />
+              <span className="md:hidden text-base font-medium">
+                AI Consultant
+              </span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative justify-start gap-2"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                navigate("/cart");
+              }}
+              title="Cart"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {getTotalItems() > 0 && (
+                <Badge className="absolute -top-2 -right-2 w-5 h-5 rounded-full p-0 flex items-center justify-center text-xs bg-pink-500">
+                  {getTotalItems()}
+                </Badge>
+              )}
+              <span className="md:hidden text-base font-medium">Cart</span>
+            </Button>
+            {isLoggedIn && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative justify-start gap-2"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate("/history");
+                }}
+                aria-label="Shopping History"
+                title="Shopping History"
+              >
+                <History className="w-5 h-5" />
+                <span className="md:hidden text-base font-medium">History</span>
+              </Button>
+            )}
+            {isLoggedIn && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+                title="Logout"
+                className="justify-start gap-2"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="md:hidden text-base font-medium">Logout</span>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
